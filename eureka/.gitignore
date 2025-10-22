@@ -1,0 +1,74 @@
+
+# ============================================
+# IDEs - IntelliJ IDEA
+# ============================================
+.idea/
+*.iml
+*.ipr
+*.iws
+atlassian-ide-plugin.xml
+.idea_modules/
+
+# ============================================
+# IDEs - Visual Studio Code
+# ============================================
+.vscode/
+*.code-workspace
+.history/
+
+# ============================================
+# IDEs - Eclipse
+# ============================================
+.project
+.classpath
+.settings/
+.metadata/
+*.prefs
+
+# ============================================
+# IDEs - NetBeans
+# ============================================
+nbproject/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# ============================================
+# ENVIRONMENT & SECRETS
+# ============================================
+.env
+.env.local
+.env.*.local
+*.env
+secrets/
+*.key
+*.pem
+*.p12
+*.jks
+
+# ============================================
+# OPERATING SYSTEM
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+
+
+
