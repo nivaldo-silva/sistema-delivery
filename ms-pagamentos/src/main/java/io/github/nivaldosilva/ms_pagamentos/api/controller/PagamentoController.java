@@ -2,7 +2,6 @@ package io.github.nivaldosilva.ms_pagamentos.api.controller;
 
 import java.net.URI;
 import java.util.UUID;
-
 import io.github.nivaldosilva.ms_pagamentos.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
