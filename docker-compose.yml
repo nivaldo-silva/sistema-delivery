@@ -21,8 +21,6 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=pedidos
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - sistema-delivery-net
 

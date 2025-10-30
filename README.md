@@ -21,25 +21,46 @@ O sistema é composto por quatro microsserviços principais que trabalham em con
 
 ```mermaid
 graph TD
-    subgraph Usuário
-        A[Cliente API] --> B{API Gateway};
+    subgraph Cliente
+        A[Cliente API]
+        style A fill:#e0f2f7,stroke:#00bcd4,stroke-width:2px,color:#212121
     end
 
-    subgraph "Infraestrutura & Roteamento"
-        B -- Roteia para --> C[ms-pedidos];
-        B -- Roteia para --> D[ms-pagamentos];
-        E((Eureka Server)) -- Registra/Descobre --> B;
-        E -- Registra/Descobre --> C;
-        E -- Registra/Descobre --> D;
+    subgraph Infraestrutura & Roteamento
+        B{API Gateway}
+        style B fill:#bbdefb,stroke:#2196f3,stroke-width:2px,color:#212121
+        E((Eureka Server))
+        style E fill:#90caf9,stroke:#1976d2,stroke-width:2px,color:#212121
     end
 
-    subgraph "Serviços de Negócio"
-        C -- Chamada Síncrona (Feign) --> D;
-        D -- Mensagem Assíncrona (RabbitMQ) --> F[(RabbitMQ)];
-        F -- Consumidor --> C;
-        C -- Acessa --> G[(DB Pedidos)];
-        D -- Acessa --> H[(DB Pagamentos)];
+    subgraph Serviços de Negócio
+        C[ms-pedidos]
+        style C fill:#c8e6c9,stroke:#4caf50,stroke-width:2px,color:#212121
+        D[ms-pagamentos]
+        style D fill:#a5d6a7,stroke:#388e3c,stroke-width:2px,color:#212121
     end
+
+    subgraph Mensageria & Dados
+        F[(RabbitMQ)]
+        style F fill:#e1bee7,stroke:#9c27b0,stroke-width:2px,color:#212121
+        G[(DB Pedidos)]
+        style G fill:#ffecb3,stroke:#ffc107,stroke-width:2px,color:#212121
+        H[(DB Pagamentos)]
+        style H fill:#ffe082,stroke:#ffb300,stroke-width:2px,color:#212121
+    end
+
+    A --> B;
+    B -- Roteia para --> C;
+    B -- Roteia para --> D;
+    E -- Registra/Descobre --> B;
+    E -- Registra/Descobre --> C;
+    E -- Registra/Descobre --> D;
+
+    D -- Chamada Síncrona (Feign) --> C;
+    C -- Mensagem Assíncrona (RabbitMQ) --> F;
+    F -- Consumidor --> D;
+    C -- Acessa --> G;
+    D -- Acessa --> H;
 ```
 
 ### Componentes
