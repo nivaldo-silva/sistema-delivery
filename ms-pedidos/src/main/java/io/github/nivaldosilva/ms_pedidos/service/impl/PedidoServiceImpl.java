@@ -46,6 +46,12 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setStatusPedido(StatusPedido.REALIZADO);
         Pedido pedidoSalvo = repository.save(pedido);
 
+        log.info("Gerando o número do pedido: {}", pedidoSalvo.getIdPedido());
+        repository.flush();
+        String idStr = pedidoSalvo.getIdPedido().toString().replace("-", "");
+        pedidoSalvo.setNumero("#" + idStr.substring(Math.max(0, idStr.length() - 5)).toUpperCase());
+        pedidoSalvo = repository.save(pedidoSalvo);
+
         log.info("Pedido criado com sucesso: {}", pedidoSalvo.getIdPedido());
         return PedidoMapper.toResponse(pedidoSalvo);
     }

@@ -44,14 +44,6 @@ public class Pedido {
     @Column(name = "data_hora", nullable = false, updatable = false)
     private Instant dataHora;
 
-    @PostPersist
-    public void gerarNumero() {
-        if (this.idPedido != null && this.numero == null) {
-            String idStr = this.idPedido.toString().replace("-", "");
-            this.numero = "#" + idStr.substring(Math.max(0, idStr.length() - 5)).toUpperCase();
-        }
-    }
-
     public void adicionarItem(ItemPedido item) {
         if (this.statusPedido != StatusPedido.REALIZADO) {
             throw new IllegalStateException("Não é possível adicionar itens a um pedido que não está REALIZADO.");

@@ -30,6 +30,13 @@ spring:
             loggerLevel: full
             connectTimeout: 10000
             readTimeout: 10000
+  
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: rabbitmq
+    password: root123
+
 
 eureka:
   client:

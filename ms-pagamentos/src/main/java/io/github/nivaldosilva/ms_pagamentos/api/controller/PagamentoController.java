@@ -2,6 +2,9 @@ package io.github.nivaldosilva.ms_pagamentos.api.controller;
 
 import java.net.URI;
 import java.util.UUID;
+
+import io.github.nivaldosilva.ms_pagamentos.rabbitmq.RabbitMQConfig;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PagamentoController implements PagamentoOpenApi {
 
     private final PagamentoService service;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @PostMapping
@@ -46,7 +50,9 @@ public class PagamentoController implements PagamentoOpenApi {
                 .buildAndExpand(pagamentoCriado.getIdPagamento())
                 .toUri();
 
-        log.info("URI de localização gerada: {}", location);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_NAME, pagamentoCriado);
+        log.info("Mensagem enviada para fila: {}", RabbitMQConfig.QUEUE_NAME);
+
         return ResponseEntity.created(location).body(pagamentoCriado);
     }
 

@@ -1,23 +1,23 @@
-package io.github.nivaldosilva.ms_pagamentos.dto;
+package io.github.nivaldosilva.ms_pedidos.dto;
 
-import java.math.BigDecimal;
-import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.nivaldosilva.ms_pagamentos.enums.FormaPagamento;
-import io.github.nivaldosilva.ms_pagamentos.enums.StatusPagamento;
+import io.github.nivaldosilva.ms_pedidos.enums.FormaPagamento;
+import io.github.nivaldosilva.ms_pedidos.enums.StatusPagamento;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "DTO para resposta de pagamento")
+@Schema(description = "Resposta completa do pagamento")
 public class PagamentoResponse {
 
     @JsonProperty("id_pagamento")

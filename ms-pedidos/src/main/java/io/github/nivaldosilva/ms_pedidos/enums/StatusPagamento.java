@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pagamentos.enums;
+package io.github.nivaldosilva.ms_pedidos.enums;
 
 import lombok.Getter;
 
@@ -9,5 +9,4 @@ public enum StatusPagamento {
     CONFIRMADO,
     RECUSADO,
     CANCELADO
-
 }
