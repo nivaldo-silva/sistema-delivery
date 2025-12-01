@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pedidos.api.openapi;
+package io.github.nivaldosilva.ms_pedidos.openapi;
 
 import io.github.nivaldosilva.ms_pedidos.dto.AtualizacaoStatus;
 import io.github.nivaldosilva.ms_pedidos.dto.PedidoRequest;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Pedidos", description = "API de gerenciamento de pedidos delivery")
-public interface PedidoOpenApi {
+public interface PedidoAPI {
 
         @Operation(summary = "Criar pedido", description = "Registra um novo pedido no sistema de delivery com itens, endereço de entrega e observações. Retorna o pedido criado com status REALIZADO e ID único gerado.")
         @ApiResponses({

@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pedidos.api.controller;
+package io.github.nivaldosilva.ms_pedidos.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;

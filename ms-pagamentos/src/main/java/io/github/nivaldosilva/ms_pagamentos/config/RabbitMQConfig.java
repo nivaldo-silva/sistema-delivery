@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pagamentos.rabbitmq;
+package io.github.nivaldosilva.ms_pagamentos.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

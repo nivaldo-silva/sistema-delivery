@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pagamentos.api.controller;
+package io.github.nivaldosilva.ms_pagamentos.controller;
 
 import java.net.URI;
 import java.time.Instant;

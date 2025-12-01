@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pagamentos.api.openapi;
+package io.github.nivaldosilva.ms_pagamentos.openapi;
 
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -18,7 +18,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 @Tag(name = "Pagamentos", description = "API de gerenciamento para pagamentos")
-public interface PagamentoOpenApi {
+public interface PagamentoAPI {
 
         @Operation(summary = "Cadastrar pagamento", description = "Cadastra um novo pagamento no sistema. Retorna o pagamento criado com ID gerado.")
         @ApiResponses({

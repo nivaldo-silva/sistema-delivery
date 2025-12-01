@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pedidos.api.controller;
+package io.github.nivaldosilva.ms_pedidos.controller;
 
 import java.net.URI;
 import java.util.List;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
-import io.github.nivaldosilva.ms_pedidos.api.openapi.PedidoOpenApi;
+import io.github.nivaldosilva.ms_pedidos.openapi.PedidoAPI;
 import io.github.nivaldosilva.ms_pedidos.dto.AtualizacaoStatus;
 import io.github.nivaldosilva.ms_pedidos.dto.PedidoRequest;
 import io.github.nivaldosilva.ms_pedidos.dto.PedidoResponse;
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/pedidos")
 @RequiredArgsConstructor
 @Slf4j
-public class PedidoController implements PedidoOpenApi {
+public class PedidoController implements PedidoAPI {
 
     private final PedidoService service;
 

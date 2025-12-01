@@ -1,8 +1,8 @@
-package io.github.nivaldosilva.ms_pagamentos.api.controller;
+package io.github.nivaldosilva.ms_pagamentos.controller;
 
 import java.net.URI;
 import java.util.UUID;
-import io.github.nivaldosilva.ms_pagamentos.rabbitmq.RabbitMQConfig;
+import io.github.nivaldosilva.ms_pagamentos.config.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import io.github.nivaldosilva.ms_pagamentos.api.openapi.PagamentoOpenApi;
+import io.github.nivaldosilva.ms_pagamentos.openapi.PagamentoAPI;
 import io.github.nivaldosilva.ms_pagamentos.dto.PagamentoRequest;
 import io.github.nivaldosilva.ms_pagamentos.dto.PagamentoResponse;
 import io.github.nivaldosilva.ms_pagamentos.service.PagamentoService;
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/pagamentos")
 @RequiredArgsConstructor
-public class PagamentoController implements PagamentoOpenApi {
+public class PagamentoController implements PagamentoAPI {
 
     private final PagamentoService service;
     private final RabbitTemplate rabbitTemplate;

@@ -1,4 +1,4 @@
-package io.github.nivaldosilva.ms_pagamentos.api.openapi.config;
+package io.github.nivaldosilva.ms_pedidos.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -19,10 +19,10 @@ public class OpenAPIConfig {
                 .url("https://github.com/Nivaldo-Silva");
 
         Info info = new Info()
-                .title("API Microserviço de Pagamentos")
+                .title("API Microserviço de Pedidos")
                 .version("v1")
                 .contact(contact)
-                .description("API para gerenciamento de pagamentos.");
+                .description("API para gerenciamento de pedidos.");
 
         Server localServer = new Server()
                 .url("http://localhost:8080")
