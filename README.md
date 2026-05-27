@@ -30,57 +30,11 @@ O sistema é composto por quatro componentes principais:
 - Microsserviço de Pedidos
 - Microsserviço de Pagamentos
 
-```mermaid
-graph TD
-
-    %% Estilos
-    classDef cliente fill:#424242,stroke:#212121,stroke-width:2px,color:#ffffff;
-    classDef gateway fill:#0d47a1,stroke:#0a3980,stroke-width:2px,color:#ffffff;
-    classDef eureka fill:#4e4e4e,stroke:#3a3a3a,stroke-width:2px,color:#ffffff;
-    classDef negocio fill:#00695c,stroke:#004d40,stroke-width:2px,color:#ffffff;
-    classDef mq fill:#311b92,stroke:#23136d,stroke-width:2px,color:#ffffff;
-    classDef db fill:#ffea00,stroke:#f57f17,stroke-width:2px,color:#212121;
-
-    %% Cliente
-    A[Cliente API]:::cliente
-
-    %% Infraestrutura
-    B["API Gateway<br><i>Ponto de entrada único</i>"]:::gateway
-    E["Eureka Server<br><i>Service Discovery</i>"]:::eureka
-
-    %% Microsserviços
-    C["ms-pedidos<br><i>Gerenciamento de pedidos</i>"]:::negocio
-    D["ms-pagamentos<br><i>Processamento de pagamentos</i>"]:::negocio
-
-    %% Mensageria
-    F["RabbitMQ<br><b>pagamento.concluido</b>"]:::mq
-
-    %% Bancos
-    G[("DB Pedidos<br><i>MySQL</i>")]:::db
-    H[("DB Pagamentos<br><i>MySQL</i>")]:::db
-
-    %% Fluxo HTTP
-    A -->|HTTP| B
-    B -->|Roteia requisições| C
-    B -->|Roteia requisições| D
-
-    %% Eureka
-    B -.->|Descobre serviços| E
-    C -.->|Registra serviço| E
-    D -.->|Registra serviço| E
-
-    %% Comunicação entre serviços
-    D -->|Feign - síncrono| C
-    D -.->|Publica evento| F
-    F -.->|Consome mensagem| C
-
-    %% Persistência
-    C --> G
-    D --> H
-
-    %% Alinhamento visual
-    G ~~~ H
-```
+<p align="center">
+  <img src="images/arquitetura-microsservicos.png"
+       alt="Arquitetura de Microsserviços"
+       width="1200">
+</p>
 
 ---
 
