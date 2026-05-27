@@ -1,188 +1,336 @@
 # Sistema de Delivery - Arquitetura de Microsserviços
 
-Este projeto implementa um sistema de backend para delivery utilizando uma arquitetura de microsserviços com Java e Spring Cloud. O objetivo é demonstrar a separação de responsabilidades, a comunicação entre serviços e a resiliência de um sistema distribuído.
-
-## Tecnologias Principais
-
-- **Java 21**
-- **Spring Boot 3**
-- **Spring Cloud**
-- **Maven**
-- **MySQL** (Banco de Dados)
-- **RabbitMQ** (Mensageria)
-- **Docker** (Ambiente de Desenvolvimento)
-- **OpenAPI (Swagger)** (Documentação de API)
+Este projeto implementa um sistema backend para delivery utilizando arquitetura de microsserviços com Java e Spring Cloud. O objetivo é demonstrar comunicação entre serviços, separação de responsabilidades, resiliência e boas práticas em sistemas distribuídos.
 
 ---
 
-## Arquitetura
+# Tecnologias Principais
 
-O sistema é composto por quatro microsserviços principais que trabalham em conjunto:
+- Java 21
+- Spring Boot 3
+- Spring Cloud
+- Spring Cloud Gateway
+- Eureka Server
+- OpenFeign
+- RabbitMQ
+- MySQL
+- Flyway
+- Docker & Docker Compose
+- Maven
+- OpenAPI (Swagger)
+
+---
+
+# Arquitetura de Microsserviços
+
+O sistema é composto por quatro componentes principais:
+
+- API Gateway
+- Eureka Server
+- Microsserviço de Pedidos
+- Microsserviço de Pagamentos
 
 ```mermaid
 graph TD
-    subgraph Cliente
-        A[Cliente API]
-        style A fill:#e0f2f7,stroke:#00bcd4,stroke-width:2px,color:#212121
-    end
 
-    subgraph Infraestrutura & Roteamento
-        B{API Gateway}
-        style B fill:#bbdefb,stroke:#2196f3,stroke-width:2px,color:#212121
-        E((Eureka Server))
-        style E fill:#90caf9,stroke:#1976d2,stroke-width:2px,color:#212121
-    end
+    %% Estilos
+    classDef cliente fill:#424242,stroke:#212121,stroke-width:2px,color:#ffffff;
+    classDef gateway fill:#0d47a1,stroke:#0a3980,stroke-width:2px,color:#ffffff;
+    classDef eureka fill:#4e4e4e,stroke:#3a3a3a,stroke-width:2px,color:#ffffff;
+    classDef negocio fill:#00695c,stroke:#004d40,stroke-width:2px,color:#ffffff;
+    classDef mq fill:#311b92,stroke:#23136d,stroke-width:2px,color:#ffffff;
+    classDef db fill:#ffea00,stroke:#f57f17,stroke-width:2px,color:#212121;
 
-    subgraph Serviços de Negócio
-        C[ms-pedidos]
-        style C fill:#c8e6c9,stroke:#4caf50,stroke-width:2px,color:#212121
-        D[ms-pagamentos]
-        style D fill:#a5d6a7,stroke:#388e3c,stroke-width:2px,color:#212121
-    end
+    %% Cliente
+    A[Cliente API]:::cliente
 
-    subgraph Mensageria & Dados
-        F[(RabbitMQ)]
-        style F fill:#e1bee7,stroke:#9c27b0,stroke-width:2px,color:#212121
-        G[(DB Pedidos)]
-        style G fill:#ffecb3,stroke:#ffc107,stroke-width:2px,color:#212121
-        H[(DB Pagamentos)]
-        style H fill:#ffe082,stroke:#ffb300,stroke-width:2px,color:#212121
-    end
+    %% Infraestrutura
+    B["API Gateway<br><i>Ponto de entrada único</i>"]:::gateway
+    E["Eureka Server<br><i>Service Discovery</i>"]:::eureka
 
-    A --> B;
-    B -- Roteia para --> C;
-    B -- Roteia para --> D;
-    E -- Registra/Descobre --> B;
-    E -- Registra/Descobre --> C;
-    E -- Registra/Descobre --> D;
+    %% Microsserviços
+    C["ms-pedidos<br><i>Gerenciamento de pedidos</i>"]:::negocio
+    D["ms-pagamentos<br><i>Processamento de pagamentos</i>"]:::negocio
 
-    D -- Chamada Síncrona (Feign) --> C;
-    C -- Mensagem Assíncrona (RabbitMQ) --> F;
-    F -- Consumidor --> D;
-    C -- Acessa --> G;
-    D -- Acessa --> H;
+    %% Mensageria
+    F["RabbitMQ<br><b>pagamento.concluido</b>"]:::mq
+
+    %% Bancos
+    G[("DB Pedidos<br><i>MySQL</i>")]:::db
+    H[("DB Pagamentos<br><i>MySQL</i>")]:::db
+
+    %% Fluxo HTTP
+    A -->|HTTP| B
+    B -->|Roteia requisições| C
+    B -->|Roteia requisições| D
+
+    %% Eureka
+    B -.->|Descobre serviços| E
+    C -.->|Registra serviço| E
+    D -.->|Registra serviço| E
+
+    %% Comunicação entre serviços
+    D -->|Feign - síncrono| C
+    D -.->|Publica evento| F
+    F -.->|Consome mensagem| C
+
+    %% Persistência
+    C --> G
+    D --> H
+
+    %% Alinhamento visual
+    G ~~~ H
 ```
 
-### Componentes
+---
 
-1.  **Eureka Server (`eureka`)**
-    - **Responsabilidade:** Service Discovery (Registro e Descoberta de Serviços).
-    - **Detalhes:** Todos os outros microsserviços se registram no Eureka ao iniciar. Isso permite que eles se encontrem na rede sem a necessidade de hardcoding de IPs ou portas, facilitando a escalabilidade e a resiliência.
+# Componentes
 
-2.  **API Gateway (`gateway`)**
-    - **Responsabilidade:** Ponto de entrada único para todas as requisições externas.
-    - **Detalhes:** Utiliza o Spring Cloud Gateway para rotear o tráfego para os microsserviços apropriados. Ele se integra ao Eureka para descobrir dinamicamente as localizações dos serviços, atuando também como um **Load Balancer** (balanceador de carga) no lado do cliente para distribuir as requisições entre múltiplas instâncias de um mesmo serviço.
+## Eureka Server (`eureka`)
 
-3.  **Microsserviço de Pedidos (`ms-pedidos`)**
-    - **Responsabilidade:** Gerenciar todo o ciclo de vida dos pedidos (CRUD de Pedidos e Itens).
-    - **Comunicação:**
-        - Expõe uma API REST para operações de CRUD.
-        - Consome mensagens da fila do RabbitMQ para receber atualizações de status de pagamento.
+Responsável pelo registro e descoberta de serviços.
 
-4.  **Microsserviço de Pagamentos (`ms-pagamentos`)**
-    - **Responsabilidade:** Processar e gerenciar os pagamentos dos pedidos.
-    - **Comunicação:**
-        - Expõe uma API REST para operações de CRUD e confirmação de pagamento.
-        - Publica mensagens no RabbitMQ quando um pagamento é criado.
-        - Realiza chamadas síncronas para o `ms-pedidos` via OpenFeign para notificar a confirmação de um pagamento.
+Todos os microsserviços se registram automaticamente no Eureka, permitindo descoberta dinâmica sem necessidade de configurar IPs ou portas manualmente.
 
 ---
 
-## Padrões de Comunicação
+## API Gateway (`gateway`)
 
-O projeto demonstra dois padrões de comunicação entre serviços, cada um usado em um contexto apropriado.
+Responsável por centralizar todas as requisições externas.
 
-### 1. Comunicação Síncrona (Request-Response)
+Funções principais:
 
-- **Tecnologia:** OpenFeign
-- **Fluxo:** `ms-pagamentos` -> `ms-pedidos`
-- **Caso de Uso:** Quando um pagamento é confirmado através do endpoint `PATCH /pagamentos/{id}/confirmar`, o `ms-pagamentos` precisa notificar **imediatamente** o `ms-pedidos` para que o status do pedido seja atualizado para `PAGO`.
-- **Implementação Notável (Padrão Saga):** Se a chamada síncrona para o `ms-pedidos` falhar, o `PagamentoService` captura a exceção e **reverte** o status do pagamento. Isso garante que os dados não fiquem em um estado inconsistente, uma prática robusta para gerenciar transações distribuídas.
-
-### 2. Comunicação Assíncrona (Event-Driven)
-
-- **Tecnologia:** RabbitMQ
-- **Fluxo:** `ms-pagamentos` -> `Fila RabbitMQ` -> `ms-pedidos`
-- **Caso de Uso:** Quando um novo pagamento é criado (`POST /pagamentos`), o `ms-pagamentos` publica uma mensagem na fila `pagamento.concluido`. Ele não precisa esperar por uma resposta, o que desacopla os serviços.
-- **Vantagens:** Aumenta a resiliência. Se o `ms-pedidos` estiver offline, a mensagem permanecerá na fila para ser processada quando o serviço voltar a ficar disponível.
+- Roteamento de requisições
+- Integração com Eureka
+- Balanceamento de carga
+- Ponto único de entrada da aplicação
 
 ---
 
-## Documentação da API (Swagger)
+## Microsserviço de Pedidos (`ms-pedidos`)
 
-Cada microsserviço de negócio expõe sua própria documentação de API usando OpenAPI (Swagger). Após iniciar os serviços, você pode acessar a UI do Swagger através do API Gateway:
+Responsável pelo gerenciamento do ciclo de vida dos pedidos.
 
-- **API de Pedidos:** [http://localhost:8080/ms-pedidos/swagger-ui/index.html](http://localhost:8080/ms-pedidos/swagger-ui/index.html)
-- **API de Pagamentos:** [http://localhost:8080/ms-pagamentos/swagger-ui/index.html](http://localhost:8080/ms-pagamentos/swagger-ui/index.html)
+### Responsabilidades
 
----
+- CRUD de pedidos
+- CRUD de itens do pedido
+- Atualização de status
+- Consumo de eventos do RabbitMQ
 
-## Banco de Dados
+### Comunicação
 
-- **Sistema:** MySQL
-- **Gerenciamento de Migrações:** O versionamento do schema do banco de dados é gerenciado pelo **Flyway**. Os scripts de migração SQL se encontram na pasta `src/main/resources/db/migration` de cada serviço (`ms-pedidos` e `ms-pagamentos`).
-
----
-
-## Tratamento de Erros (Problem Details)
-
-Para garantir uma experiência consistente e padronizada para os clientes da API, o sistema adota o padrão **Problem Details for HTTP APIs (RFC 7807)** para as respostas de erro.
-
-- **Implementação:** Cada microsserviço de negócio (`ms-pedidos` e `ms-pagamentos`) possui um `@RestControllerAdvice` que intercepta exceções lançadas pela aplicação.
-- **Padronização:** Em vez de respostas de erro genéricas, a API retorna um objeto `ProblemDetail` em formato `application/problem+json`. Este objeto fornece detalhes claros e legíveis por máquina sobre o erro, como:
-    - `type`: Um URI que identifica o tipo do erro.
-    - `title`: Um título curto e legível.
-    - `status`: O código de status HTTP.
-    - `detail`: Uma explicação específica sobre a ocorrência do erro.
-    - `instance`: O caminho da requisição que originou o erro.
-    - Campos customizados, como `timestamp` e listas de erros de validação.
-
-Essa abordagem simplifica o tratamento de erros no lado do cliente e melhora a capacidade de depuração do sistema.
+- Exposição de API REST
+- Consumo de mensagens assíncronas de pagamento
 
 ---
 
-## Como Executar o Projeto
+## Microsserviço de Pagamentos (`ms-pagamentos`)
 
-### Pré-requisitos
+Responsável pelo processamento dos pagamentos.
 
-- Java 21 (ou superior)
-- Apache Maven 3.8 (ou superior)
-- Docker e Docker Compose
+### Responsabilidades
 
-### Passos
+- CRUD de pagamentos
+- Confirmação de pagamento
+- Publicação de eventos
 
-1.  **Iniciar a Infraestrutura (Banco de Dados e Mensageria):**
-    Na raiz do projeto, execute o seguinte comando para iniciar os contêineres do MySQL e RabbitMQ:
-    ```sh
-    docker-compose up -d
-    ```
-    - O MySQL estará disponível em `localhost:3306`.
-    - A interface de gerenciamento do RabbitMQ estará em `http://localhost:15672` (usuário: `rabbitmq`, senha: `root123`).
+### Comunicação
 
-2.  **Compilar todos os Módulos:**
-    Na raiz do projeto, compile todos os microsserviços com o Maven:
-    ```sh
-    mvn clean install
-    ```
+- Exposição de API REST
+- Publicação de mensagens no RabbitMQ
+- Comunicação síncrona com `ms-pedidos` via OpenFeign
 
-3.  **Executar os Microsserviços:**
-    Você precisa iniciar cada serviço em um terminal separado, na ordem correta para garantir que as dependências de registro estejam prontas.
+---
 
-    ```sh
-    # 1. Terminal - Eureka Server
-    java -jar eureka/target/eureka-server-0.0.1-SNAPSHOT.jar
+# Padrões de Comunicação
 
-    # 2. Terminal - API Gateway
-    java -jar gateway/target/gateway-0.0.1-SNAPSHOT.jar
+O projeto utiliza comunicação síncrona e assíncrona entre microsserviços.
 
-    # 3. Terminal - MS Pedidos
-    java -jar ms-pedidos/target/ms-pedidos-0.0.1-SNAPSHOT.jar
+---
 
-    # 4. Terminal - MS Pagamentos
-    java -jar ms-pagamentos/target/pagamentos-0.0.1-SNAPSHOT.jar
-    ```
+## Comunicação Síncrona
 
-4.  **Verificar o Registro de Serviços:**
-    Acesse a UI do Eureka em [http://localhost:8761](http://localhost:8761). Após alguns instantes, você verá `GATEWAY`, `MS-PEDIDOS` e `MS-PAGAMENTOS` registrados.
+### Tecnologia
 
+- OpenFeign
 
+### Fluxo
+
+```text
+ms-pagamentos -> ms-pedidos
+```
+
+### Caso de uso
+
+Quando um pagamento é confirmado, o serviço de pagamentos notifica imediatamente o serviço de pedidos para atualizar o status do pedido para `PAGO`.
+
+### Estratégia de Compensação
+
+Caso a comunicação falhe, o serviço reverte o status do pagamento para evitar inconsistência entre os microsserviços.
+
+---
+
+## Comunicação Assíncrona
+
+### Tecnologia
+
+- RabbitMQ
+
+### Fluxo
+
+```text
+ms-pagamentos -> RabbitMQ -> ms-pedidos
+```
+
+### Caso de uso
+
+Ao criar um pagamento, o serviço publica um evento na fila `pagamento.concluido`.
+
+### Benefícios
+
+- Desacoplamento entre serviços
+- Maior resiliência
+- Processamento assíncrono
+- Tolerância a falhas
+
+---
+
+# Banco de Dados
+
+## MySQL
+
+Cada microsserviço possui seu próprio banco de dados.
+
+### Migrações
+
+O versionamento do schema é realizado com Flyway.
+
+Localização dos scripts:
+
+```text
+src/main/resources/db/migration
+```
+
+---
+
+# Tratamento de Erros
+
+O projeto utiliza o padrão:
+
+```text
+RFC 7807 - Problem Details for HTTP APIs
+```
+
+Cada microsserviço possui um `@RestControllerAdvice` responsável por padronizar respostas de erro.
+
+### Estrutura da resposta
+
+- `type`
+- `title`
+- `status`
+- `detail`
+- `instance`
+- `timestamp`
+- erros de validação
+
+---
+
+# Documentação da API
+
+A documentação é gerada utilizando OpenAPI (Swagger).
+
+## Swagger - Pedidos
+
+```text
+http://localhost:8080/ms-pedidos/swagger-ui/index.html
+```
+
+## Swagger - Pagamentos
+
+```text
+http://localhost:8080/ms-pagamentos/swagger-ui/index.html
+```
+
+---
+
+# Como Executar o Projeto
+
+## Pré-requisitos
+
+- Java 21+
+- Maven 3.8+
+- Docker
+- Docker Compose
+
+---
+
+## 1. Subir infraestrutura
+
+```bash
+docker-compose up -d
+```
+
+### Serviços disponíveis
+
+- MySQL → `localhost:3306`
+- RabbitMQ → `http://localhost:15672`
+
+```text
+Usuário: rabbitmq
+Senha: root123
+```
+
+---
+
+## 2. Compilar os projetos
+
+```bash
+mvn clean install
+```
+
+---
+
+## 3. Executar os microsserviços
+
+### Eureka Server
+
+```bash
+java -jar eureka/target/eureka-server-0.0.1-SNAPSHOT.jar
+```
+
+### API Gateway
+
+```bash
+java -jar gateway/target/gateway-0.0.1-SNAPSHOT.jar
+```
+
+### MS Pedidos
+
+```bash
+java -jar ms-pedidos/target/ms-pedidos-0.0.1-SNAPSHOT.jar
+```
+
+### MS Pagamentos
+
+```bash
+java -jar ms-pagamentos/target/pagamentos-0.0.1-SNAPSHOT.jar
+```
+
+---
+
+## 4. Verificar registro dos serviços
+
+Acesse:
+
+```text
+http://localhost:8761
+```
+
+Os seguintes serviços deverão aparecer registrados:
+
+- GATEWAY
+- MS-PEDIDOS
+- MS-PAGAMENTOS
+
+---
