@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: ms-pagamentos
+  output:
+    ansi:
+      enabled: ALWAYS
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/pagamentos
@@ -50,7 +53,11 @@ eureka:
     hostname: localhost
 
 logging:
+  pattern:
+    console: '%clr(%d{dd-MM-yyyy HH:mm:ss}){faint} %clr(%5p) %clr([%t]){faint} %clr(%-40.40logger){cyan} %clr(:){yellow} %m%n'
   level:
+    root: INFO
     io.github.nivaldosilva.ms_pagamentos.client: DEBUG
+    org.springframework.web: DEBUG
     feign: DEBUG
     org.apache.http: DEBUG
