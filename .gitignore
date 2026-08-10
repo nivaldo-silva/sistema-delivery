@@ -1,2 +1,6 @@
 # Arquivos temporários
 *.tmp
+
+# Arquivos de configuração
+.idea/
+.vscode/
